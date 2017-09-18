@@ -48,7 +48,11 @@ namespace YouTube_Downloader_1._0
 
 
         private void linkLabel1_Click(object sender, EventArgs e){
-            Process.Start(linkLabel1.Text);
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK){ 
+            linkLabel1.Text = folderBrowserDialog1.SelectedPath;
+            SavePath = folderBrowserDialog1.SelectedPath;
+            Properties.Settings.Default.SavePath = folderBrowserDialog1.SelectedPath;
+            Properties.Settings.Default.Save();}
         }
         
         private void comboBox1_KeyPress(object sender, KeyPressEventArgs e)

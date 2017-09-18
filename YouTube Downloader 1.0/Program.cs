@@ -11,7 +11,7 @@ namespace YouTube_Downloader_1._0
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
-     //   [STAThread]
+        [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
