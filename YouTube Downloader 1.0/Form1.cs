@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -82,6 +79,26 @@ namespace YouTube_Downloader_1._0
             }
         }
 
+        private void ConvertVideoToAudio (string filePath,string title, MediaToolkit.Options.ConversionOptions options = null)
+        {
+            var sourceFile = new MediaFile { Filename = filePath};
+            var output = new MediaFile { Filename = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath)) + ".mp3"};
+
+            using (var eng = new Engine())
+            {
+                eng.GetMetadata(sourceFile);
+                eng.Convert(sourceFile, output,options);
+            }
+
+            File.Delete(filePath);
+
+            foreach (ListViewItem l in listView1.Items)
+            {
+                if (l.Name == title) { l.SubItems[3].Text = "Done"; break; }
+            }
+
+        }
+
         private string RemoveInvalidFileNameCharsFromTitle(string title)
         {
             string newTitle="";
@@ -129,23 +146,12 @@ namespace YouTube_Downloader_1._0
          
             await Client.DownloadMediaStreamAsync(streamInfo, v.SavePath + @"\" + v.FileName);
 
-            do{
-                Thread.Sleep(500);
+            do
+            {
+                Thread.Sleep(100);
                 Application.DoEvents();
-            }while (thread.IsAlive);
-
-            var sourceFile = new MediaFile {Filename = v.SavePath + @"\" + v.FileName };
-            var output = new MediaFile { Filename = v.SavePath + @"\" + Path.GetFileNameWithoutExtension(v.FileName) + ".mp3"};
-         
-            using (var eng = new Engine()){
-                eng.GetMetadata(sourceFile);
-                eng.Convert(sourceFile, output);}
-
-            File.Delete(v.SavePath + @"\" + v.FileName);
-
-            foreach (ListViewItem l in listView1.Items){
-                if (l.Name == v.Title)  { l.SubItems[3].Text = "Done"; break;}}
-
+            } while (thread.IsAlive);
+            ConvertVideoToAudio(v.SavePath + @"\" + v.FileName,v.Title);        
         }
         private async Task DownloadVideoAsync(Video v)
         {
@@ -199,10 +205,10 @@ namespace YouTube_Downloader_1._0
                 if (l.Name == v.Title) { l.SubItems[3].Text = "Done"; break; }}
         }
         
-        private void UpdateProgressBar(string filepath , string videoTitle)
+        private void UpdateProgressBar(string filepath ,  string videoTitle)
         {
             bool Done = false;
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
 
             while (Done == false)
             {
@@ -224,6 +230,7 @@ namespace YouTube_Downloader_1._0
                         pb.Value = perc;
                         l.SubItems[3].Text = perc.ToString();
 
+                       
                         Thread.Sleep(500);
                         Application.DoEvents();
                         if (double.Parse(Msize) == s)
